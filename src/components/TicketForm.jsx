@@ -16,7 +16,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
   const [formData, setFormData] = useState({
     pnr_number: "",
     transport_mode: ticketType,
-    status: "available",
     api_verified: false,
     api_provider: "",
     verification_confidence: null,
@@ -130,7 +129,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
       setFormData({
         pnr_number: "",
         transport_mode: ticketType,
-        status: "available",
         api_verified: false,
         api_provider: "",
         verification_confidence: null,

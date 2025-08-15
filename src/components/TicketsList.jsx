@@ -91,6 +91,7 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     };
   }, [ticketType]);
 
+  // Remove status from TICKET_FIELDS and all display logic
   const TICKET_FIELDS = {
     bus: [
       { key: "pnr_number", label: "PNR Number" },
@@ -102,7 +103,6 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
       { key: "passenger_name", label: "Passenger" },
       { key: "seat_number", label: "Seat" },
       { key: "ticket_price", label: "Ticket Price" },
-      { key: "status", label: "Status" },
     ],
     train: [
       { key: "pnr_number", label: "PNR Number" },
@@ -118,7 +118,6 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
       { key: "passenger_name", label: "Passenger" },
       { key: "seat_number", label: "Seat" },
       { key: "ticket_price", label: "Ticket Price" },
-      { key: "status", label: "Status" },
     ],
     plane: [
       { key: "pnr_number", label: "PNR Number" },
@@ -134,7 +133,6 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
       { key: "passenger_name", label: "Passenger" },
       { key: "seat_number", label: "Seat" },
       { key: "ticket_price", label: "Ticket Price" },
-      { key: "status", label: "Status" },
     ],
   };
 
@@ -218,10 +216,6 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
                 <span className="text-xs text-gray-400">Price</span>
                 <span className="font-bold text-lg text-green-700">₹{ticket.ticket_price}</span>
               </div>
-              <div className="flex flex-col flex-1 min-w-[60px]">
-                <span className="text-xs text-gray-400">Status</span>
-                <span className="font-medium">{ticket.status}</span>
-              </div>
             </div>
           </div>
           {/* Right: Details and stub */}
@@ -230,7 +224,7 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
               {/* Details section: only show extra fields for this ticket type */}
               <div className="w-full text-[11px] text-gray-600 space-y-1">
                 {fields.map(({ key, label }) =>
-                  ["pnr_number", "from_location", "to_location", "passenger_name", "seat_number", "departure_date", "departure_time", "ticket_price", "status"].includes(key)
+                  ["pnr_number", "from_location", "to_location", "passenger_name", "seat_number", "departure_date", "departure_time", "ticket_price"].includes(key)
                     ? null
                     : ticket[key] !== undefined && ticket[key] !== "" && (
                         <div key={key} className="flex flex-col">
