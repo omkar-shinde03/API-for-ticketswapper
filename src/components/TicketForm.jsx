@@ -11,6 +11,7 @@ import { Bus, Train, Plane } from "lucide-react";
 export function TicketForm({ ticketType = "bus", onTicketAdded }) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   // Unified form data structure for all ticket types
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     platform_number: "",
     coach_class: "",
     berth_type: "",
-    railway_zone: "",
+    onboarding_station: "",
     is_tatkal: false,
     flight_number: "",
     airline_operator: "",
@@ -50,7 +51,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
       platform_number: "",
       coach_class: "",
       berth_type: "",
-      railway_zone: "",
+      onboarding_station: "",
       is_tatkal: false,
       flight_number: "",
       airline_operator: "",
@@ -70,6 +71,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
   const fieldConfigs = {
     bus: [
       { name: "bus_operator", label: "Bus Operator", placeholder: "e.g., RedBus", required: true },
+      { name: "onboarding_station", label: "Onboarding Station", placeholder: "e.g., Borivali", required: false },
       { name: "from_location", label: "From Location", placeholder: "e.g., Mumbai", required: true },
       { name: "to_location", label: "To Location", placeholder: "e.g., Pune", required: true },
     ],
@@ -79,7 +81,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
       { name: "platform_number", label: "Platform Number", placeholder: "e.g., 5", required: false },
       { name: "coach_class", label: "Coach/Class", type: "select", options: COACH_CLASS_OPTIONS, required: false },
       { name: "berth_type", label: "Berth Type", type: "select", options: BERTH_TYPE_OPTIONS, required: false },
-      { name: "railway_zone", label: "Railway Zone", placeholder: "e.g., WR, CR", required: false },
+      { name: "onboarding_station", label: "Onboarding Station", placeholder: "e.g., Vadodara", required: false },
       { name: "is_tatkal", label: "Is Tatkal", type: "checkbox", required: false },
       { name: "from_location", label: "From Location", placeholder: "e.g., Mumbai", required: true },
       { name: "to_location", label: "To Location", placeholder: "e.g., Delhi", required: true },
@@ -87,6 +89,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     plane: [
       { name: "flight_number", label: "Flight Number", placeholder: "e.g., AI202", required: true },
       { name: "airline_operator", label: "Airline Operator", placeholder: "e.g., Air India", required: true },
+      { name: "onboarding_station", label: "Onboarding Station", placeholder: "e.g., T2 Gate 5", required: false },
       { name: "cabin_class", label: "Cabin Class", type: "select", options: CABIN_CLASS_OPTIONS, required: false },
       { name: "airport_terminal", label: "Airport Terminal", placeholder: "e.g., T1, T2", required: false },
       { name: "baggage_allowance", label: "Baggage Allowance", type: "select", options: BAGGAGE_ALLOWANCE_OPTIONS, required: false },
@@ -103,8 +106,70 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     }));
   };
 
+  // Validation function
+  const validate = () => {
+    const newErrors = {};
+    // Name: required, only letters/spaces
+    if (!formData.passenger_name || !/^[A-Za-z ]+$/.test(formData.passenger_name)) {
+      newErrors.passenger_name = "Name must contain only letters and spaces.";
+    }
+    // PNR: required, alphanumeric
+    if (!formData.pnr_number || !/^[A-Za-z0-9]+$/.test(formData.pnr_number)) {
+      newErrors.pnr_number = "PNR must be alphanumeric and not empty.";
+    }
+    // Ticket price: required, > 0
+    if (!formData.ticket_price || isNaN(formData.ticket_price) || formData.ticket_price <= 0) {
+      newErrors.ticket_price = "Ticket price must be a positive number.";
+    }
+    // Seat number: required
+    if (!formData.seat_number) {
+      newErrors.seat_number = "Seat number is required.";
+    }
+    // From/To location: required, only letters/spaces
+    if (!formData.from_location || !/^[A-Za-z ]+$/.test(formData.from_location)) {
+      newErrors.from_location = "From location must contain only letters and spaces.";
+    }
+    if (!formData.to_location || !/^[A-Za-z ]+$/.test(formData.to_location)) {
+      newErrors.to_location = "To location must contain only letters and spaces.";
+    }
+    // Departure date: required
+    if (!formData.departure_date) {
+      newErrors.departure_date = "Departure date is required.";
+    }
+    // Departure time: required
+    if (!formData.departure_time) {
+      newErrors.departure_time = "Departure time is required.";
+    }
+    // Type-specific required fields
+    if (ticketType === "bus" && !formData.bus_operator) {
+      newErrors.bus_operator = "Bus operator is required.";
+    }
+    if (ticketType === "train" && !formData.train_number) {
+      newErrors.train_number = "Train number is required.";
+    }
+    if (ticketType === "train" && !formData.railway_operator) {
+      newErrors.railway_operator = "Railway operator is required.";
+    }
+    if (ticketType === "plane" && !formData.flight_number) {
+      newErrors.flight_number = "Flight number is required.";
+    }
+    if (ticketType === "plane" && !formData.airline_operator) {
+      newErrors.airline_operator = "Airline operator is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsLoading(true);
     try {
       // Remove empty string or null fields before insert
@@ -132,7 +197,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
         platform_number: "",
         coach_class: "",
         berth_type: "",
-        railway_zone: "",
+        onboarding_station: "",
         is_tatkal: false,
         flight_number: "",
         airline_operator: "",
@@ -147,6 +212,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
         seat_number: "",
         ticket_price: 0,
       });
+      setErrors({});
       onTicketAdded && onTicketAdded();
     } catch (error) {
       toast({
@@ -174,6 +240,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
               onChange={handleChange}
             />
             <Label htmlFor={field.name}>{field.label}</Label>
+            {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
           </div>
         );
       }
@@ -194,6 +261,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
+            {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
           </div>
         );
       }
@@ -208,6 +276,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
             required={field.required}
             placeholder={field.placeholder}
           />
+          {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
         </div>
       );
     });

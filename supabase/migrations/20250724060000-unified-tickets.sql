@@ -19,7 +19,7 @@ CREATE TABLE public.tickets (
   platform_number TEXT,
   coach_class TEXT,
   berth_type TEXT,
-  railway_zone TEXT,
+  onboarding_station TEXT,
   is_tatkal BOOLEAN,
   -- Plane fields
   flight_number TEXT,
