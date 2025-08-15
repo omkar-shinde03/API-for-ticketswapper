@@ -17,7 +17,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     pnr_number: "",
     transport_mode: ticketType,
     status: "available",
-    verification_status: "pending",
     api_verified: false,
     api_provider: "",
     verification_confidence: null,
@@ -43,7 +42,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     passenger_name: "",
     seat_number: "",
     ticket_price: 0,
-    selling_price: 0,
   });
 
   useEffect(() => {
@@ -106,7 +104,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : name === "ticket_price" || name === "selling_price" ? parseFloat(value) || 0 : value,
+      [name]: type === "checkbox" ? checked : name === "ticket_price" ? parseFloat(value) || 0 : value,
     }));
   };
 
@@ -133,7 +131,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
         pnr_number: "",
         transport_mode: ticketType,
         status: "available",
-        verification_status: "pending",
         api_verified: false,
         api_provider: "",
         verification_confidence: null,
@@ -159,7 +156,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
         passenger_name: "",
         seat_number: "",
         ticket_price: 0,
-        selling_price: 0,
       });
       onTicketAdded && onTicketAdded();
     } catch (error) {
@@ -314,21 +310,6 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
                 onChange={handleChange}
                 required
                 placeholder="e.g., 1500.00"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="selling_price">Selling Price</Label>
-              <Input
-                id="selling_price"
-                name="selling_price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.selling_price}
-                onChange={handleChange}
-                placeholder="e.g., 1200.00"
               />
             </div>
           </div>

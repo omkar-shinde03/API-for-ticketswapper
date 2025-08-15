@@ -4,7 +4,6 @@ CREATE TABLE public.tickets (
   pnr_number TEXT NOT NULL,
   transport_mode TEXT NOT NULL CHECK (transport_mode IN ('bus', 'train', 'plane')),
   status TEXT NOT NULL CHECK (status IN ('available', 'sold', 'cancelled')),
-  verification_status TEXT NOT NULL CHECK (verification_status IN ('pending', 'verified', 'rejected')),
   api_verified BOOLEAN,
   api_provider TEXT,
   verification_confidence NUMERIC,
@@ -35,8 +34,7 @@ CREATE TABLE public.tickets (
   to_location TEXT,
   passenger_name TEXT,
   seat_number TEXT,
-  ticket_price NUMERIC,
-  selling_price NUMERIC
+  ticket_price NUMERIC
 );
 
 -- Indexes for performance
