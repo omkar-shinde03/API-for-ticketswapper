@@ -27,7 +27,7 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
       const { data, error } = await supabase
         .from("tickets")
         .select("*")
-        .eq("transport_mode", ticketType)
+        .ilike("transport_mode", ticketType)
         .order("created_at", { ascending: false });
       if (error) throw error;
       setTickets(data || []);
@@ -79,7 +79,7 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
           event: '*',
           schema: 'public',
           table: 'tickets',
-          filter: `transport_mode=eq.${ticketType}`,
+          filter: `transport_mode=ilike.${ticketType}`,
         },
         (payload) => {
           fetchTickets();

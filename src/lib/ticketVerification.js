@@ -15,17 +15,17 @@ export class TicketVerificationService {
         supabase
           .from("bus_tickets")
           .select("*")
-          .eq("pnr_number", pnrNumber)
+          .ilike("pnr_number", pnrNumber)
           .single(),
         supabase
           .from("train_tickets")
           .select("*")
-          .eq("pnr_number", pnrNumber)
+          .ilike("pnr_number", pnrNumber)
           .single(),
         supabase
           .from("plane_tickets")
           .select("*")
-          .eq("pnr_number", pnrNumber)
+          .ilike("pnr_number", pnrNumber)
           .single(),
       ]);
 
