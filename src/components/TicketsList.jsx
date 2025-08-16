@@ -124,7 +124,7 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
       { key: "flight_number", label: "Flight Number" },
       { key: "airline_operator", label: "Airline" },
       { key: "cabin_class", label: "Cabin Class" },
-      { key: "airport_terminal", label: "Terminal" },
+      { key: "terminal", label: "Terminal" },
       { key: "baggage_allowance", label: "Baggage" },
       { key: "from_location", label: "From" },
       { key: "to_location", label: "To" },

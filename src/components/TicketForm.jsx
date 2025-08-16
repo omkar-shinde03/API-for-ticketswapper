@@ -24,12 +24,13 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     platform_number: "",
     coach_class: "",
     berth_type: "",
-    onboarding_station: "",
+    onboarding_station: "", // for bus/train only
     is_tatkal: false,
     flight_number: "",
     airline_operator: "",
     cabin_class: "",
-    airport_terminal: "",
+    terminal: "", // for plane only
+    airport_terminal: "", // legacy, can be removed if not used elsewhere
     baggage_allowance: "",
     departure_date: "",
     departure_time: "",
@@ -56,6 +57,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
       flight_number: "",
       airline_operator: "",
       cabin_class: "",
+      terminal: "",
       airport_terminal: "",
       baggage_allowance: "",
     }));
@@ -89,9 +91,9 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     plane: [
       { name: "flight_number", label: "Flight Number", placeholder: "e.g., AI202", required: true },
       { name: "airline_operator", label: "Airline Operator", placeholder: "e.g., Air India", required: true },
-      { name: "onboarding_station", label: "Onboarding Station", placeholder: "e.g., T2 Gate 5", required: false },
+      { name: "onboarding_station", label: "Onboarding Airport", placeholder: "e.g., Mumbai International Airport", required: false },
+      { name: "terminal", label: "Terminal", placeholder: "e.g., T2", required: false },
       { name: "cabin_class", label: "Cabin Class", type: "select", options: CABIN_CLASS_OPTIONS, required: false },
-      { name: "airport_terminal", label: "Airport Terminal", placeholder: "e.g., T1, T2", required: false },
       { name: "baggage_allowance", label: "Baggage Allowance", type: "select", options: BAGGAGE_ALLOWANCE_OPTIONS, required: false },
       { name: "from_location", label: "From Location", placeholder: "e.g., Mumbai", required: true },
       { name: "to_location", label: "To Location", placeholder: "e.g., Dubai", required: true },
@@ -100,9 +102,18 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let newValue = value;
+    // Determine if the field is a select (dropdown)
+    const isSelectField = fieldConfigs[ticketType].some(
+      (field) => field.name === name && field.type === "select"
+    );
+    // Do not capitalize transport_mode or select fields
+    if (name !== "transport_mode" && !isSelectField && typeof value === "string") {
+      newValue = value.toUpperCase();
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : name === "ticket_price" ? parseFloat(value) || 0 : value,
+      [name]: type === "checkbox" ? checked : name === "ticket_price" ? parseFloat(newValue) || 0 : newValue,
     }));
   };
 
@@ -110,51 +121,111 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
   const validate = () => {
     const newErrors = {};
     // Name: required, only letters/spaces
-    if (!formData.passenger_name || !/^[A-Za-z ]+$/.test(formData.passenger_name)) {
+    if (!formData.passenger_name || !/^[A-Z ]+$/.test(formData.passenger_name)) {
       newErrors.passenger_name = "Name must contain only letters and spaces.";
     }
     // PNR: required, alphanumeric
-    if (!formData.pnr_number || !/^[A-Za-z0-9]+$/.test(formData.pnr_number)) {
+    if (!formData.pnr_number || !/^[A-Z0-9]+$/.test(formData.pnr_number)) {
       newErrors.pnr_number = "PNR must be alphanumeric and not empty.";
     }
-    // Ticket price: required, > 0
-    if (!formData.ticket_price || isNaN(formData.ticket_price) || formData.ticket_price <= 0) {
+    // Ticket price: required, > 0, must be a number
+    if (
+      formData.ticket_price === undefined ||
+      formData.ticket_price === null ||
+      formData.ticket_price === "" ||
+      isNaN(Number(formData.ticket_price)) ||
+      Number(formData.ticket_price) <= 0
+    ) {
       newErrors.ticket_price = "Ticket price must be a positive number.";
     }
-    // Seat number: required
-    if (!formData.seat_number) {
-      newErrors.seat_number = "Seat number is required.";
+    // Seat number: required, can be alphanumeric (e.g., 12A)
+    if (!formData.seat_number || !/^[A-Z0-9]+$/.test(formData.seat_number)) {
+      newErrors.seat_number = "Seat number is required and must be alphanumeric.";
     }
     // From/To location: required, only letters/spaces
-    if (!formData.from_location || !/^[A-Za-z ]+$/.test(formData.from_location)) {
+    if (!formData.from_location || !/^[A-Z ]+$/.test(formData.from_location)) {
       newErrors.from_location = "From location must contain only letters and spaces.";
     }
-    if (!formData.to_location || !/^[A-Za-z ]+$/.test(formData.to_location)) {
+    if (!formData.to_location || !/^[A-Z ]+$/.test(formData.to_location)) {
       newErrors.to_location = "To location must contain only letters and spaces.";
     }
-    // Departure date: required
-    if (!formData.departure_date) {
-      newErrors.departure_date = "Departure date is required.";
+    // Departure date: required (YYYY-MM-DD)
+    if (!formData.departure_date || !/^\d{4}-\d{2}-\d{2}$/.test(formData.departure_date)) {
+      newErrors.departure_date = "Departure date is required and must be in YYYY-MM-DD format.";
     }
-    // Departure time: required
-    if (!formData.departure_time) {
-      newErrors.departure_time = "Departure time is required.";
+    // Departure time: required (HH:MM)
+    if (!formData.departure_time || !/^\d{2}:\d{2}$/.test(formData.departure_time)) {
+      newErrors.departure_time = "Departure time is required and must be in HH:MM format.";
     }
-    // Type-specific required fields
-    if (ticketType === "bus" && !formData.bus_operator) {
-      newErrors.bus_operator = "Bus operator is required.";
+    // Prevent ticket creation for past date/time
+    if (formData.departure_date && formData.departure_time &&
+        /^\d{4}-\d{2}-\d{2}$/.test(formData.departure_date) &&
+        /^\d{2}:\d{2}$/.test(formData.departure_time)) {
+      const now = new Date();
+      const depDateTime = new Date(`${formData.departure_date}T${formData.departure_time}`);
+      if (depDateTime < now) {
+        newErrors.departure_date = "Cannot create ticket for a past date/time.";
+      }
     }
-    if (ticketType === "train" && !formData.train_number) {
-      newErrors.train_number = "Train number is required.";
+    // Bus-specific
+    if (ticketType === "bus") {
+      if (!formData.bus_operator) {
+        newErrors.bus_operator = "Bus operator is required.";
+      }
+      // Onboarding station: optional, only letters/spaces
+      if (formData.onboarding_station && !/^[A-Z ]+$/.test(formData.onboarding_station)) {
+        newErrors.onboarding_station = "Onboarding station must contain only letters and spaces.";
+      }
     }
-    if (ticketType === "train" && !formData.railway_operator) {
-      newErrors.railway_operator = "Railway operator is required.";
+    // Train-specific
+    if (ticketType === "train") {
+      if (!formData.train_number || !/^[A-Z0-9]+$/.test(formData.train_number)) {
+        newErrors.train_number = "Train number is required and must be alphanumeric.";
+      }
+      if (!formData.railway_operator) {
+        newErrors.railway_operator = "Railway operator is required.";
+      }
+      // Platform number: optional, must be numeric if present
+      if (formData.platform_number && isNaN(Number(formData.platform_number))) {
+        newErrors.platform_number = "Platform number must be numeric.";
+      }
+      // Coach class: optional, must be in allowed options if present
+      if (formData.coach_class && !COACH_CLASS_OPTIONS.includes(formData.coach_class)) {
+        newErrors.coach_class = "Invalid coach/class option.";
+      }
+      // Berth type: optional, must be in allowed options if present
+      if (formData.berth_type && !BERTH_TYPE_OPTIONS.includes(formData.berth_type)) {
+        newErrors.berth_type = "Invalid berth type option.";
+      }
+      // Onboarding station: optional, only letters/spaces
+      if (formData.onboarding_station && !/^[A-Z ]+$/.test(formData.onboarding_station)) {
+        newErrors.onboarding_station = "Onboarding station must contain only letters and spaces.";
+      }
     }
-    if (ticketType === "plane" && !formData.flight_number) {
-      newErrors.flight_number = "Flight number is required.";
-    }
-    if (ticketType === "plane" && !formData.airline_operator) {
-      newErrors.airline_operator = "Airline operator is required.";
+    // Plane-specific
+    if (ticketType === "plane") {
+      if (!formData.flight_number || !/^[A-Z0-9]+$/.test(formData.flight_number)) {
+        newErrors.flight_number = "Flight number is required and must be alphanumeric.";
+      }
+      if (!formData.airline_operator) {
+        newErrors.airline_operator = "Airline operator is required.";
+      }
+      // Onboarding airport: optional, only letters/spaces
+      if (formData.onboarding_station && !/^[A-Z ]+$/.test(formData.onboarding_station)) {
+        newErrors.onboarding_station = "Onboarding airport must contain only letters and spaces.";
+      }
+      // Terminal: optional, can be alphanumeric (e.g., T2)
+      if (formData.terminal && !/^[A-Z0-9]+$/.test(formData.terminal)) {
+        newErrors.terminal = "Terminal must be alphanumeric.";
+      }
+      // Cabin class: optional, must be in allowed options if present
+      if (formData.cabin_class && !CABIN_CLASS_OPTIONS.includes(formData.cabin_class)) {
+        newErrors.cabin_class = "Invalid cabin class option.";
+      }
+      // Baggage allowance: optional, must be in allowed options if present
+      if (formData.baggage_allowance && !BAGGAGE_ALLOWANCE_OPTIONS.includes(formData.baggage_allowance)) {
+        newErrors.baggage_allowance = "Invalid baggage allowance option.";
+      }
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -178,6 +249,12 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
           ([key, value]) => value !== "" && value !== null && value !== undefined
         )
       );
+      // Capitalize all string fields except transport_mode before saving
+      Object.keys(ticketData).forEach((key) => {
+        if (key !== "transport_mode" && typeof ticketData[key] === "string") {
+          ticketData[key] = ticketData[key].toUpperCase();
+        }
+      });
       const { error } = await supabase
         .from("tickets")
         .insert([ticketData]);
@@ -202,6 +279,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
         flight_number: "",
         airline_operator: "",
         cabin_class: "",
+        terminal: "",
         airport_terminal: "",
         baggage_allowance: "",
         departure_date: "",
