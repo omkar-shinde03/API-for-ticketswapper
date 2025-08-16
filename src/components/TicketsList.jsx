@@ -96,6 +96,7 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     bus: [
       { key: "pnr_number", label: "PNR Number" },
       { key: "bus_operator", label: "Bus Operator" },
+      { key: "onboarding_station", label: "Onboarding Station" },
       { key: "from_location", label: "From" },
       { key: "to_location", label: "To" },
       { key: "departure_date", label: "Departure Date" },
@@ -107,9 +108,11 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     train: [
       { key: "pnr_number", label: "PNR Number" },
       { key: "train_number", label: "Train Number" },
-      { key: "railway_operator", label: "Railway Operator" },
-      { key: "coach_class", label: "Coach/Class" },
-      { key: "berth_type", label: "Berth Type" },
+      { key: "train_name", label: "Train Name" },
+      { key: "source_station", label: "Source Station" },
+      { key: "destination_station", label: "Destination Station" },
+      { key: "coach_number", label: "Coach Number" },
+      { key: "ticket_class", label: "Ticket Class" },
       { key: "platform_number", label: "Platform" },
       { key: "from_location", label: "From" },
       { key: "to_location", label: "To" },
@@ -122,10 +125,13 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     plane: [
       { key: "pnr_number", label: "PNR Number" },
       { key: "flight_number", label: "Flight Number" },
-      { key: "airline_operator", label: "Airline" },
-      { key: "cabin_class", label: "Cabin Class" },
+      { key: "airline_name", label: "Airline" },
+      { key: "source_airport", label: "Source Airport" },
+      { key: "destination_airport", label: "Destination Airport" },
+      { key: "gate_number", label: "Gate Number" },
+      { key: "ticket_class", label: "Ticket Class" },
+      { key: "baggage_allowance", label: "Baggage Allowance" },
       { key: "terminal", label: "Terminal" },
-      { key: "baggage_allowance", label: "Baggage" },
       { key: "from_location", label: "From" },
       { key: "to_location", label: "To" },
       { key: "departure_date", label: "Departure Date" },
@@ -175,66 +181,35 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
   const renderTicketCard = (ticket) => {
     const fields = TICKET_FIELDS[ticket.transport_mode] || [];
     return (
-      <div key={ticket.id} className="relative flex flex-row max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 my-2 min-h-[120px]">
+      <div key={ticket.id} className="relative flex flex-col max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 my-4">
         {/* Background image */}
-        {BG_IMAGES[ticket.transport_mode]}
-        {/* Main ticket content */}
-        <div className="flex-1 flex flex-row items-center p-4 pr-0 z-10">
+        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none select-none">
+          {BG_IMAGES[ticket.transport_mode]}
+        </div>
+        <div className="flex flex-row items-center p-4 z-10">
           {/* Left: Icon and PNR */}
           <div className="flex flex-col items-center justify-center px-4">
             {TICKET_ICONS[ticket.transport_mode]}
             <span className="text-base font-bold tracking-widest mt-1 mb-2">{ticket.pnr_number}</span>
-            <Badge variant="secondary" className="mb-1">{ticket.transport_mode}</Badge>
+            <Badge variant="secondary" className="mb-1 uppercase">{ticket.transport_mode}</Badge>
           </div>
           {/* Center: Main Info */}
-          <div className="flex-1 flex flex-col gap-1 px-4">
-            <div className="flex gap-4 items-center">
-              <div className="flex flex-col flex-1 min-w-[80px]">
-                <span className="text-xs text-gray-400">From</span>
-                <span className="font-semibold text-base truncate">{ticket.from_location}</span>
-              </div>
-              <div className="flex flex-col flex-1 min-w-[80px]">
-                <span className="text-xs text-gray-400">To</span>
-                <span className="font-semibold text-base truncate">{ticket.to_location}</span>
-              </div>
-              <div className="flex flex-col flex-1 min-w-[80px]">
-                <span className="text-xs text-gray-400">Passenger</span>
-                <span className="font-medium truncate">{ticket.passenger_name}</span>
-              </div>
-              <div className="flex flex-col flex-1 min-w-[60px]">
-                <span className="text-xs text-gray-400">Seat</span>
-                <span className="font-medium">{ticket.seat_number}</span>
-              </div>
-            </div>
-            <div className="flex gap-4 items-center mt-1">
-              <div className="flex flex-col flex-1 min-w-[80px]">
-                <span className="text-xs text-gray-400">Departure</span>
-                <span className="font-medium">{ticket.departure_date ? new Date(ticket.departure_date).toLocaleDateString() : '-'}</span>
-                <span className="text-xs text-gray-500">{ticket.departure_time}</span>
-              </div>
-              <div className="flex flex-col flex-1 min-w-[60px]">
-                <span className="text-xs text-gray-400">Price</span>
-                <span className="font-bold text-lg text-green-700">₹{ticket.ticket_price}</span>
-              </div>
+          <div className="flex-1 flex flex-col gap-2 px-4">
+            <div className="grid grid-cols-2 gap-2">
+              {fields.map(({ key, label }) =>
+                ticket[key] !== undefined && ticket[key] !== "" && (
+                  <div key={key} className="flex flex-col">
+                    <span className="text-xs text-gray-400 font-medium">{label}</span>
+                    <span className="font-semibold text-base truncate">
+                      {key.includes("date") ? (ticket[key] ? new Date(ticket[key]).toLocaleDateString() : "-") : ticket[key]}
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </div>
-          {/* Right: Details and stub */}
+          {/* Right: Actions */}
           <div className="flex flex-col items-center justify-between bg-gray-50 border-l border-dashed border-gray-300 p-2 min-w-[90px] h-full relative">
-            <div className="flex-1 flex flex-col items-center justify-center w-full">
-              {/* Details section: only show extra fields for this ticket type */}
-              <div className="w-full text-[11px] text-gray-600 space-y-1">
-                {fields.map(({ key, label }) =>
-                  ["pnr_number", "from_location", "to_location", "passenger_name", "seat_number", "departure_date", "departure_time", "ticket_price"].includes(key)
-                    ? null
-                    : ticket[key] !== undefined && ticket[key] !== "" && (
-                        <div key={key} className="flex flex-col">
-                          <span className="text-gray-400">{label}</span>
-                          <span className="font-medium truncate">{key.includes("date") ? (ticket[key] ? new Date(ticket[key]).toLocaleDateString() : "-") : ticket[key]}</span>
-                        </div>
-                      )
-                )}
-              </div>
-            </div>
             <Button
               variant="destructive"
               size="icon"
