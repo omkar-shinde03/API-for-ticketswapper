@@ -151,29 +151,44 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
   // SVG background images for each ticket type (soft, semi-transparent)
   const BG_IMAGES = {
     train: (
-      <svg viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-0 bottom-0 w-32 h-16 opacity-20 pointer-events-none select-none">
+      <svg viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-2 bottom-2 w-24 h-12 opacity-20 pointer-events-none select-none">
         <rect x="10" y="30" width="100" height="18" rx="6" fill="#4ade80" />
         <rect x="20" y="20" width="80" height="18" rx="6" fill="#22d3ee" />
         <rect x="30" y="10" width="60" height="18" rx="6" fill="#a3e635" />
         <circle cx="30" cy="48" r="6" fill="#64748b" />
         <circle cx="90" cy="48" r="6" fill="#64748b" />
+        {/* Train icon */}
+        <g opacity="0.5">
+          <rect x="50" y="20" width="20" height="20" rx="5" fill="#0ea5e9" />
+          <rect x="55" y="25" width="10" height="10" rx="2" fill="#fff" />
+        </g>
       </svg>
     ),
     bus: (
-      <svg viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-0 bottom-0 w-32 h-16 opacity-20 pointer-events-none select-none">
+      <svg viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-2 bottom-2 w-24 h-12 opacity-20 pointer-events-none select-none">
         <rect x="10" y="30" width="100" height="18" rx="8" fill="#60a5fa" />
         <rect x="20" y="20" width="80" height="14" rx="7" fill="#fbbf24" />
         <rect x="30" y="10" width="60" height="10" rx="5" fill="#f87171" />
         <circle cx="30" cy="48" r="6" fill="#64748b" />
         <circle cx="90" cy="48" r="6" fill="#64748b" />
+        {/* Bus icon */}
+        <g opacity="0.5">
+          <rect x="50" y="25" width="20" height="10" rx="3" fill="#22d3ee" />
+          <rect x="55" y="28" width="10" height="4" rx="1" fill="#fff" />
+        </g>
       </svg>
     ),
     plane: (
-      <svg viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-0 bottom-0 w-32 h-16 opacity-20 pointer-events-none select-none">
+      <svg viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute right-2 bottom-2 w-24 h-12 opacity-20 pointer-events-none select-none">
         <rect x="10" y="30" width="100" height="18" rx="9" fill="#818cf8" />
         <rect x="20" y="20" width="80" height="10" rx="5" fill="#f472b6" />
         <polygon points="60,10 70,40 50,40" fill="#facc15" />
         <rect x="55" y="40" width="10" height="8" rx="4" fill="#64748b" />
+        {/* Plane icon */}
+        <g opacity="0.5">
+          <polygon points="60,20 70,35 50,35" fill="#fff" />
+          <rect x="58" y="35" width="4" height="8" rx="2" fill="#fff" />
+        </g>
       </svg>
     ),
   };
@@ -182,10 +197,8 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     const fields = TICKET_FIELDS[ticket.transport_mode] || [];
     return (
       <div key={ticket.id} className="relative flex flex-col max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 my-4">
-        {/* Background image */}
-        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none select-none">
-          {BG_IMAGES[ticket.transport_mode]}
-        </div>
+        {/* Soft background image for ticket type */}
+        {BG_IMAGES[ticket.transport_mode]}
         <div className="flex flex-row items-center p-4 z-10">
           {/* Left: Icon and PNR */}
           <div className="flex flex-col items-center justify-center px-4">
