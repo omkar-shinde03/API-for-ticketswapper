@@ -29,7 +29,9 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
         .select("*")
         .ilike("transport_mode", ticketType)
         .order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       setTickets(data || []);
     } catch (error) {
       toast({
@@ -49,7 +51,9 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
         .from("tickets")
         .delete()
         .eq("id", id);
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       toast({
         title: "Success",
         description: "Ticket deleted successfully",
@@ -108,12 +112,11 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     train: [
       { key: "pnr_number", label: "PNR Number" },
       { key: "train_number", label: "Train Number" },
-      { key: "train_name", label: "Train Name" },
-      { key: "source_station", label: "Source Station" },
-      { key: "destination_station", label: "Destination Station" },
-      { key: "coach_number", label: "Coach Number" },
-      { key: "ticket_class", label: "Ticket Class" },
+      { key: "railway_operator", label: "Railway Operator" },
+      { key: "onboarding_station", label: "Onboarding Station" },
       { key: "platform_number", label: "Platform" },
+      { key: "coach_class", label: "Coach/Class" },
+      { key: "berth_type", label: "Berth Type" },
       { key: "from_location", label: "From" },
       { key: "to_location", label: "To" },
       { key: "departure_date", label: "Departure Date" },
@@ -125,13 +128,11 @@ export function TicketsList({ ticketType = "bus", refreshTrigger }) {
     plane: [
       { key: "pnr_number", label: "PNR Number" },
       { key: "flight_number", label: "Flight Number" },
-      { key: "airline_name", label: "Airline" },
-      { key: "source_airport", label: "Source Airport" },
-      { key: "destination_airport", label: "Destination Airport" },
-      { key: "gate_number", label: "Gate Number" },
-      { key: "ticket_class", label: "Ticket Class" },
-      { key: "baggage_allowance", label: "Baggage Allowance" },
+      { key: "airline_operator", label: "Airline Operator" },
+      { key: "onboarding_station", label: "Onboarding Airport" },
       { key: "terminal", label: "Terminal" },
+      { key: "cabin_class", label: "Cabin Class" },
+      { key: "baggage_allowance", label: "Baggage Allowance" },
       { key: "from_location", label: "From" },
       { key: "to_location", label: "To" },
       { key: "departure_date", label: "Departure Date" },

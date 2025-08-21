@@ -258,7 +258,9 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
       const { error } = await supabase
         .from("tickets")
         .insert([ticketData]);
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       toast({
         title: "Success",
         description: `Ticket created successfully!`,
@@ -304,61 +306,7 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
     }
   };
 
-  // Render fields based on ticket type
-  const renderFields = () => {
-    return fieldConfigs[ticketType].map((field) => {
-      if (field.type === "checkbox") {
-        return (
-          <div key={field.name} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id={field.name}
-              name={field.name}
-              checked={formData[field.name] || false}
-              onChange={handleChange}
-            />
-            <Label htmlFor={field.name}>{field.label}</Label>
-            {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
-          </div>
-        );
-      }
-      if (field.type === "select") {
-        return (
-          <div key={field.name}>
-            <Label htmlFor={field.name}>{field.label}</Label>
-            <select
-              id={field.name}
-              name={field.name}
-              value={formData[field.name] || ""}
-              onChange={handleChange}
-              required={field.required}
-              className="w-full border rounded px-2 py-1"
-            >
-              <option value="">Select {field.label}</option>
-              {field.options.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-            {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
-          </div>
-        );
-      }
-      return (
-        <div key={field.name}>
-          <Label htmlFor={field.name}>{field.label}</Label>
-          <Input
-            id={field.name}
-            name={field.name}
-            value={formData[field.name] || ""}
-            onChange={handleChange}
-            required={field.required}
-            placeholder={field.placeholder}
-          />
-          {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
-        </div>
-      );
-    });
-  };
+  
 
   return (
     <Card className="w-full max-w-2xl">
@@ -396,8 +344,59 @@ export function TicketForm({ ticketType = "bus", onTicketAdded }) {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            {renderFields()}
+          <div className="space-y-4">
+            {fieldConfigs[ticketType].map((field) => {
+              if (field.type === "checkbox") {
+                return (
+                  <div key={field.name} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={field.name}
+                      name={field.name}
+                      checked={formData[field.name] || false}
+                      onChange={handleChange}
+                    />
+                    <Label htmlFor={field.name}>{field.label}</Label>
+                    {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
+                  </div>
+                );
+              }
+              if (field.type === "select") {
+                return (
+                  <div key={field.name}>
+                    <Label htmlFor={field.name}>{field.label}</Label>
+                    <select
+                      id={field.name}
+                      name={field.name}
+                      value={formData[field.name] || ""}
+                      onChange={handleChange}
+                      required={field.required}
+                      className="w-full border rounded px-2 py-1"
+                    >
+                      <option value="">Select {field.label}</option>
+                      {field.options.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                    {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
+                  </div>
+                );
+              }
+              return (
+                <div key={field.name}>
+                  <Label htmlFor={field.name}>{field.label}</Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                  />
+                  {errors[field.name] && <span className="text-xs text-red-500 ml-2">{errors[field.name]}</span>}
+                </div>
+              );
+            })}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
